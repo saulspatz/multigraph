@@ -86,8 +86,8 @@ at one of the endpoints, with e0 = e, and use this to recolor some edges
 so that e can be colored.
 
 Note that if e0, e1, ..., en is a fan anchored at x, then so is e0, e1, ..., ek
-for any 0 <= k < n.  Also, even if all the edges ej may be distinct, since
-this is a multigraph it is quite possible that yi = yj so some i != j.
+for any 0 <= k < n.  Also, even though all the edges ej are distinct, since
+this is a multigraph, it is quite possible that yi = yj so some i != j.
 
 The important operation on a fan is what I will call "folding" it.  (Think 
 of a Japanese fan.)  If an edge of the fan is ej = (x, yj) and some color a 
@@ -121,10 +121,9 @@ class Fan:
     '''
     
     def __init__(self, e):
-        # Choose the endpoint with lower degree as anchor.
-        # This is just a heuristic.
-        self.x = e.x if e.x.degree() <= e.y.degree() else e.y
-        # The "rim" comprises the non-anchor vertiecs of the fan
+        # Heuristic: Choose the endpoint with lower degree as anchor.
+        self.x = e.x if e.x.degree() <= e.y.degree() else e.y  # heuristic
+        # The "rim" comprises the non-anchor vertices of the fan
         self.rim = [e.y if self.x == e.x else e.x]
         self.fan = [e]
         done = False
@@ -135,7 +134,7 @@ class Fan:
         while not done:
             f = self.nextEdge()
             self.append(f)
-            y = f.y if f.x == self.x else f.x
+            y = self.rim[-1]
             if y.missingColors() & self.x.missingColors():
                 self.fold()
                 done = True
@@ -202,7 +201,7 @@ class Fan:
         x = self.x
         for e in self.candidates:
             if e.color in self.missingColors:
-                return e
+                return e   # self.append will remove e from self.candidates 
             
     def append(self, e):
         # add edge e to the fan and do all the bookkeeping
@@ -215,14 +214,15 @@ class Fan:
     def fold(self):
         fan, rim, x = self.fan, self.rim, self.x
         xMissing = x.missingColors()
-        new = (xMissing & rim[-1].missingColors()).pop()
+        for new in xMissing & rim[-1].missingColors():
+            break
+        old = fan[-1].color
         fan[-1].colorWith(new)
         if len(fan) > 1:
-            old = fan[-1].color
             for idx, y in enumerate(rim[:-1]):
                 if old in y.missingColors(): break
             self.fan = fan[:idx+1]
-            self.rim = rim[:idx+1]             
+            self.rim = rim[:idx+1]  
             self.fold()
                
     def reducible(self):
@@ -283,7 +283,7 @@ class Fan:
         x = self.x
         yi = self.rim[i]
         yn = self.rim[-1]
-        a = ( yn.missingColors() & yi.missingColors()).pop()
+        a = (yn.missingColors() & yi.missingColors()).pop()
         b = x.missingColors().pop()
         if self.chain(yi, a, b, x):
             self.fan = self.fan[:i+1]
@@ -331,6 +331,8 @@ class Multigraph:
         for v in self.vertices.values():
             self.Delta = max(self.Delta, v.degree())
         K = min(self.Delta + self.mu, 3*self.Delta//2)
+        print('|V| = %d |E| = %d Delta = %d mu = %d K = %d' %
+              (len(self.vertices), len(self.edges), self.Delta, self.mu, K))
         self.colors = set()
         for c in range(1, K+1):
             self.colors.add(c)
@@ -339,11 +341,10 @@ class Multigraph:
         for e in self.edges.values():
             both = e.x.missingColors() & e.y.missingColors()
             if both:
-                c = both.pop()
-                e.colorWith(c)
-            else:   
+                e.colorWith(both.pop())
+            else:
                 Fan(e)
-
+    
     def getData(self, infile):
         mu = 0
         vertices = self.vertices
@@ -416,13 +417,15 @@ class Multigraph:
         if level >= 1:
             for e in self.edges.values():
                 a = e.color
-                if a & (a not in e.x.colors or a not in e.y.colors):
+                if a and (a not in e.x.colors or a not in e.y.colors):
                     return False
         #test that for each vertex, there are no duplicate colors
         if level >= 2:
             for v in self.vertices.values():
-                k = len({e for e in v.edges if e.color})
-                if len(v.colors) != k:
+                ec = [e for e in v.edges if e.color]
+                if len(v.colors) != len(ec):
+                    return False
+                if {e.color for e in ec} != v.colors:
                     return False
         return True
                 
