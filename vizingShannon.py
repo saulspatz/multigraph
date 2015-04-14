@@ -322,8 +322,9 @@ class Fan:
             v.colors.remove(old)
         
 class Multigraph:
-    def __init__(self, infile):
+    def __init__(self, infile, progress = True):
         self.infile = infile
+        self.progress = progress
         self.vertices = dict()
         self.edges = dict()
         self.mu = self.getData(infile)
@@ -338,7 +339,10 @@ class Multigraph:
             self.colors.add(c)
         
     def edgeColor(self):
+        placebo = self. progress
         for e in self.edges.values():
+            if placebo and (e.ident % 10000==0):
+                print("Coloring edge %d" %e.ident)
             both = e.x.missingColors() & e.y.missingColors()
             if both:
                 e.colorWith(both.pop())
@@ -480,6 +484,8 @@ def main():
     G = Multigraph(sys.argv[1])
     G.edgeColor()
     G.ouputColors(sys.argv[2])
+    print("Coloring complete. %.2f seconds\nChecking" %(time()-start))
+    start = time()
     result = G.audit()
     if not result:
         print('**** Failed audit ****  time %.2f seconds' % (time() -start))
