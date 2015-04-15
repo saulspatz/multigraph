@@ -339,8 +339,9 @@ class Multigraph:
             self.colors.add(c)
         
     def edgeColor(self):
+        edges = self.edges
         placebo = self. progress
-        for e in self.edges.values():
+        for e in edges.values():
             if placebo and (e.ident % 10000==0):
                 print("Coloring edge %d" %e.ident)
             both = e.x.missingColors() & e.y.missingColors()
@@ -416,21 +417,20 @@ class Multigraph:
             print("Could not open output file/n")
             exit()
             
-    def debug(self, level):
+    def invariant(self):
+        # Is the grapgh properly colored so far?
         # test that for every colored edge, the color is listed at both ends
-        if level >= 1:
-            for e in self.edges.values():
-                a = e.color
-                if a and (a not in e.x.colors or a not in e.y.colors):
-                    return False
+        for e in self.edges.values():
+            a = e.color
+            if a and (a not in e.x.colors or a not in e.y.colors):
+                return False
         #test that for each vertex, there are no duplicate colors
-        if level >= 2:
-            for v in self.vertices.values():
-                ec = [e for e in v.edges if e.color]
-                if len(v.colors) != len(ec):
-                    return False
-                if {e.color for e in ec} != v.colors:
-                    return False
+        for v in self.vertices.values():
+            ec = [e for e in v.edges if e.color]
+            if len(v.colors) != len(ec):
+                return False
+            if {e.color for e in ec} != v.colors:
+                return False
         return True
                 
     def audit(self):
