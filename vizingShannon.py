@@ -17,10 +17,12 @@ Delta + mu is Vizing's bound, and floor(3*Delta//2) is Shannon's bound.  Ron Gou
 who posted the proof (obtained from B. Toft) says is the "Book proof" of the two 
 theorems, referring to Erdos's conceit that God has a Book with all the best proofs
 of all the theorems.  Erdos would describe an elegant proof as "from the Book." I
-have to agree that this proof belongs in the book.
+have to agree that this proof belongs in the Book.
 '''
+from __future__ import division
 import sys, os
 from collections import namedtuple
+import random
 
 class Edge:
     def __init__(self, ident, x, y, m, G):
@@ -283,8 +285,8 @@ class Fan:
         x = self.x
         yi = self.rim[i]
         yn = self.rim[-1]
-        a = (yn.missingColors() & yi.missingColors()).pop()
-        b = x.missingColors().pop()
+        a = random.sample((yn.missingColors() & yi.missingColors()), 1)[0]
+        b = random.sample(x.missingColors(), 1)[0]
         if self.chain(yi, a, b, x):
             self.fan = self.fan[:i+1]
             self.rim = self.rim[:i+1]
@@ -340,13 +342,16 @@ class Multigraph:
         
     def edgeColor(self):
         edges = self.edges
+        N = len(edges)
         placebo = self. progress
         for e in edges.values():
             if placebo and (e.ident % 10000==0):
-                print("Coloring edge %d" %e.ident)
+                pct = 100*e.ident/N
+                sys.stdout.write("\rColoring edge %d %.2f %%  " %(e.ident, pct))
+                sys.stdout.flush()
             both = e.x.missingColors() & e.y.missingColors()
             if both:
-                e.colorWith(both.pop())
+                e.colorWith(random.sample(both, 1)[0])
             else:
                 Fan(e)
     
@@ -405,7 +410,8 @@ class Multigraph:
         self.outfile = outfile
         header = 'N %d M %d Delta %d mu %d colors %d\n' %( 
               len(self.vertices),len(self.edges), self.Delta, self.mu, len(self.colors)) 
-        print(header)
+        sys.stdout.write('\r'+header)
+        sys.stdout.flush()
         length = len(str(len(self.edges)))
         fs = ('%%%dd %%%dd %%%dd %%%dd\n' % (length, length, length, length))
         try:
