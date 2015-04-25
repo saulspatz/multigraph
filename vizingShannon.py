@@ -89,7 +89,7 @@ so that e can be colored.
 
 Note that if e0, e1, ..., en is a fan anchored at x, then so is e0, e1, ..., ek
 for any 0 <= k < n.  Also, even though all the edges ej are distinct, since
-this is a multigraph, it is quite possible that yi = yj so some i != j.
+this is a multigraph, it is quite possible that yi = yj for some i != j.
 
 The important operation on a fan is what I will call "folding" it.  (Think 
 of a Japanese fan.)  If an edge of the fan is ej = (x, yj) and some color a 
@@ -193,12 +193,12 @@ class Fan:
         so K is also less than Shannon's bound.  This is a contradiction, since K is chosen
         as the lesser of Shannon's bound and Vizing's bound.
         
-        To see that m >= 1, we only have to confirm that at least one edge not paarallel to
+        To see that m >= 1, we only have to confirm that at least one edge not parallel to
         e0 is added to the fan.  To add e1, we must find a color present at x and missing 
-        at y.  If there is no such color, then every color prsent at x is present at y, so 
+        at y.  If there is no such color, then every color present at x is present at y, so 
         every color missing at y is missing at x.  There is a color missing at y (K > Delta), 
-        so we would would not build the fan in the first place.   Since the fan is not 
-        reducible, M(y0) and M(y1) are disjoint, so y0 !+ y1 and e0 and e1 are not parallel.    
+        or we would would not build the fan in the first place.   Since the fan is not 
+        reducible, M(y0) and M(y1) are disjoint, so y0 != y1 and e0 and e1 are not parallel.    
         '''
         x = self.x
         for e in self.candidates:
@@ -243,14 +243,12 @@ class Fan:
         at yn (the last vertex on the rim) and at yj, for some j < n.  Let i 
         Let yi be the first vertex on the rim at which color a is missing.
         Let b be any color missing at x.  Since we only get here it the fan is not
-        foldable, b is present at every rim vertex.  An a-b chain is an sequence
+        foldable, b is present at every rim vertex.  An a-b chain is a sequence
         of edges alternately colored a and b.  Such a chain must be a simple
-        path or a simple cycle.  If it first returns to a vertex v that is already on
-        the chain, v must be reached by an edge not on the chain.  But unless
-        v is the first vertex on the chain, the a-colored edge an the b-colored
-        edge at v are already on the chain.  We will only consider the a-b chain
-        Pi starting at yi and the a-b chain Pn starting at yn.  Since a is missing
-        at both the rim vertices, both the chains are simple paths.
+        path or a simple cycle, since all its vertices are of degree 1 or 2.
+        We will only consider the a-b chain Pi starting at yi and the a-b chain 
+        Pn starting at yn.  Since a is missing at both the rim vertices, both the 
+        chains are simple paths.
     
         We can swap the colors on an a-b chain, coloring every a-colored edge
         on the chain with b, and vice versa.  We still have a valid coloring
