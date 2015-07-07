@@ -8,7 +8,7 @@ but change the expanation in terms of "neighbor vertices" to a simpler one in
 terms of "candidate edges", and we minimize instead of maximizing.
 
 Call an assignment L of real numbers to the vertices an "labeling" if
-for every edge xy, we have L(x) + L(y) <= w(xy,) where w is the weight.
+for every edge xy, we have L(x) + L(y) <= w(x,y) where w is the weight.
 Call an edge xy "tight" (w.r.t L) if L(x) + L(y) = w(x,y).
 It can be shown that a complete matching in which every edge is tight
 is of minimal weight.
@@ -28,7 +28,7 @@ Call an edge xy a "candidate edge" if
  alternating.
  
  The algorithm is:
- Consruct a trivial labeling.
+ Construct a trivial labeling.
  While M is not complete:
      choose a free X-vertex u and make it the root of A
      loop forever
