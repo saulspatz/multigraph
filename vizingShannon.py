@@ -92,23 +92,25 @@ for any 0 <= k < n.  Also, even though all the edges ej are distinct, since
 this is a multigraph, it is quite possible that yi = yj for some i != j.
 
 The important operation on a fan is what I will call "folding" it.  (Think 
-of a Japanese fan.)  If an edge of the fan is ej = (x, yj) and some color a 
-is missing at both at both x and yj, then let the color of en be b.  By the 
-definition of a fan, there is some i, with 0 <= i < j, so that b is missing at yi.  
-Now, we can recolor en with a,  since a is missing at both x and yn, and still 
-have a valid edge-coloring.  Now, e0, e1, ..., ei is a fan with fewer edges, and b 
-is missing at both x and yi.  That is, e0, e1, ..., ei is foldable, so we  can repeat 
-the process until we arrive  at a fan with just the edge e0, with a color c 
-missing at both x and y0.  We can then color e0 with c.  But e0 = e, the edge 
-we were trying to color, so we can move on to the next edge.
+of a Japanese fan.)  The fan is foldable if some color c is missing at
+both x and yn where en = (x, yn) is the last edge of the fan.  
+Let the color of ej be b.  By the definition of a fan, there is some i, with 
+0 <= i < n, so that b is missing at yi.  Now, we can recolor en with c,  since c 
+is missing at both x and yn, and still have a valid edge-coloring.  Now, e0, 
+e1, ..., ei is a fan with fewer edges, and b is missing at both x and yi.  
+That is, e0, e1, ..., ei is foldable, so we  can repeat the process until we 
+arrive  at a fan with just the edge e0, with a color c missing at both x and y0.  
+We can then color e0 with c.  But e0 = e, the edge we were trying to color, 
+so we can move on to the next edge.
 
 Another possibility is that as we add an edge (x, yj) it will turn out that there
-is some i, 0 <= i < j, so that the same color is missing at both yi and yj.  The
-comments to reduce() below explain how to replace the fan by a foldable
-fan in this case.
+is some i, 0 <= i < j, so that the same color is missing at both yi and yj, and
+yi != yj.  (Since this is a multgraph, it is possible that yi == yj even though
+ei != ej.)  The comments to reduce() below explain how to "reduce" the fan 
+(replace it by a foldable fan) in this case.  
 
 Finally, the paper cited at the beginning of vizingShannon.py proves that one of
-these cases must occur, so that we always get to a faoldable fan.  This proof
+these cases must occur, so that we always get to a foldable fan.  This proof
 is paraphrased in the comments to nextEdge().
 '''
 
@@ -167,7 +169,7 @@ class Fan:
         Now for 1 <= j <= m, |M(zj)| >= K - deg(zj), but we know there is an uncolored
         edge at y0, so |M(z0)| >= K - deg(z0) + 1.   Let p(x) be the number of colors 
         present at x.  Then |M(x)| = K - p(x) and |M'(x)| = p(x) - (n-1), since the fan 
-        has one uncolored edge.  Putting allm this together,
+        has one uncolored edge.  Putting all this together,
         
             K - deg(z0) + 1 + sum([K - deg(zj), 1 <= j <= m]) + K - p(x) + p(x) -(n-1) <= K
     
@@ -175,7 +177,7 @@ class Fan:
           
             2 <= sum([deg(zj), 0 <= j <= m]) + n - (m+1)K.
             
-        Let M(x, zj) be the number of edges be number of edges between x and zj.  Then
+        Let m(x, zj) be the number of edges  between x and zj.  Then
         n <= sum([m(x, zj), 0 <= j <= m]).  Then the following inequality holds:
         
            2 <= sum([deg(zj) + m(x, zj) - K]), where m >= 1 (see below).
@@ -195,10 +197,11 @@ class Fan:
         
         To see that m >= 1, we only have to confirm that at least one edge not parallel to
         e0 is added to the fan.  To add e1, we must find a color present at x and missing 
-        at y.  If there is no such color, then every color present at x is present at y, so 
-        every color missing at y is missing at x.  There is a color missing at y (K > Delta), 
-        or we would would not build the fan in the first place.   Since the fan is not 
-        reducible, M(y0) and M(y1) are disjoint, so y0 != y1 and e0 and e1 are not parallel.    
+        at y0.  If there is no such color, then every color present at x is present at y0, so 
+        every color missing at y0 is missing at x.  There is a color missing at y0 (K > Delta), 
+        but if it were missing at x,  we would would not build the fan in the first place,
+        contradiction.  Since the fan is not reducible, M(y0) and M(y1) are disjoint, 
+        so y0 != y1 and e0 and e1 are not parallel.    
         '''
         x = self.x
         for e in self.candidates:
@@ -231,21 +234,25 @@ class Fan:
         # Return (False, None) if irreducible
         # Otherwise, return (True, i) where i is the index of the
         # rim vertex we found.
+        yn = self.rim[-1] 
         missing = self.rim[-1].missingColors()
         for idx, y in enumerate(self.rim[:-1]):
-            if missing & y.missingColors():
+            if y != yn and (missing & y.missingColors()):
                 return(True, idx)
         return (False, None)
 
     def reduce(self, i):
         '''
-        Suppose that the fan is reducible, that is there is a color a missing 
-        at yn (the last vertex on the rim) and at yj, for some j < n.  Let i 
-        Let yi be the first vertex on the rim at which color a is missing.
-        Let b be any color missing at x.  Since we only get here it the fan is not
-        foldable, b is present at every rim vertex.  An a-b chain is a sequence
-        of edges alternately colored a and b.  Such a chain must be a simple
-        path or a simple cycle, since all its vertices are of degree 1 or 2.
+        Pre: yi is the first vertex on the rim with yi != yn (the last vertex on the rim)
+        such that some color a is missing at both yn and yi.  The fan e0, ..., en is not
+        foldable.  For 0 <= k < n, the fan e0, ..., ek is neither foldable nor reducible.
+        Note that if yk = yn for some k < i then e0, ..., ei would be a reducible fan,
+        contradiction, so that yi is the first vertex on the rim with a missing.
+        
+        Let b be any color missing at x.  Since we only get here if the fan is not
+        foldable, b is present at every rim vertex.  An a-b chain is a maximal sequence
+        of adjacent edges alternately colored a and b.  Such a chain must be a 
+        simple path or a simple cycle, since all its vertices are of degree 1 or 2.
         We will only consider the a-b chain Pi starting at yi and the a-b chain 
         Pn starting at yn.  Since a is missing at both the rim vertices, both the 
         chains are simple paths.
@@ -262,22 +269,21 @@ class Fan:
         distinct endpoints of this chain, which is absurd.
         
         Now suppose that x is not on Pi.  When we reverse the colors on Pi,
-        e0, e1, ..., ei is still a chain.  Since x is not on the chain, we have not
-        re-colored any of the fan edges.  We have to check whether some 
-        color missing at one of the vertices y0, y1, ... yi-1 is now present, 
-        since that might destroy the fan property. But the only colors that
-        have changed are a and b, and b is present at every rim vertex, and
-        a is present at y0 through yi-1, because we chose yi as the first rim
-        vertex with a missing.  So e0, ..., ei is a fan, but b is missing at x and
-        at ei so it is a foldable fan.
+        I claim that e0, e1, ..., ei is still a fan.  Since x is not on Pi, we have 
+        not re-colored any of the fan edges.  We have to check 
+        whether some color missing at one of the vertices y0, y1, ... yi-1 is 
+        now present, since that might destroy the fan property. But the only 
+        colors that have changed are a and b, and b was originally present at 
+        every rim vertex, and a was present at y0, ..., yi-1.  After reversing
+        the colors, b is missing at x and yi, to the fan is foldable.
         
-        Suppose then that x is on Pi.  Then x is not on Pj. When we swap the
-        colors on Pj, e0, e1, ..., en is still a fan.  As before we only have to
+        Suppose then that x is on Pi.  Then x is not on Pn. When we swap the
+        colors on Pn, e0, e1, ..., en is still a fan.  As before we only have to
         check whether a is present at some vertex at which it was missing
-        before.  In fact, since yi was the first vertex at which a was missing
-        we only have to show that a is still present at yi.  The colors at yi
-        can have changed only if Pj reaches x, but since Pi reaches x, Pj 
-        would then reach x, contradiction.  Since b is missing at and at yn,
+        before.  In fact, since yi was the first vertex at which a was missing,
+        we only have to show that a is still missing at yi.  The colors at yi
+        can have changed only if Pn reaches x, but since Pi reaches x, Pn 
+        would then reach x, contradiction.  Since b is now missing at x and at yn,
         the fan is foldable.
         '''
         x = self.x
