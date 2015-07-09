@@ -171,16 +171,16 @@ class Fan:
         present at x.  Then |M(x)| = K - p(x) and |M'(x)| = p(x) - (n-1), since the fan 
         has one uncolored edge.  Putting all this together,
         
-            K - deg(z0) + 1 + sum([K - deg(zj), 1 <= j <= m]) + K - p(x) + p(x) -(n-1) <= K
+            K - deg(z0) + 1 + sum([K - deg(zj)], , 1 <= j <= m) + K - p(x) + p(x) -(n-1) <= K
     
-            (m+2)K - sum([deg(zj), 0 <= j <= m]) - n + 2 <= K
+            (m+2)K - sum([deg(zj)], 0 <= j <= m) - n + 2 <= K
           
-            2 <= sum([deg(zj), 0 <= j <= m]) + n - (m+1)K.
+            2 <= sum([deg(zj)], 0 <= j <= m) + n - (m+1)K.
             
         Let m(x, zj) be the number of edges  between x and zj.  Then
-        n <= sum([m(x, zj), 0 <= j <= m]).  Then the following inequality holds:
+        n <= sum([m(x, zj)], 0 <= j <= m).  Then the following inequality holds:
         
-           2 <= sum([deg(zj) + m(x, zj) - K]), where m >= 1 (see below).
+           2 <= sum([deg(zj) + m(x, zj) - K],  0 <= j <= m), where m >= 1 (see below).
            
         So there is some j such that deg(zj) + m(x, zj) - K > 0.  Then Delta + mu > K, so
         K is less than Vizing's bound.  Also, since m >= 1, there are two distinct vertices
@@ -188,7 +188,7 @@ class Fan:
         
            2 <= deg(zi) + m(x, zi) - K + deg(zj) + m(x, zj) - K.
         
-        Since deg(x) <= m(x, zi) + m(x, zj),
+        Since deg(x) >= m(x, zi) + m(x, zj),
         
            2(K+1) <= deg(zi) + deg(zj) + deg(x) <= 3 * Delta, 
         
@@ -200,8 +200,8 @@ class Fan:
         at y0.  If there is no such color, then every color present at x is present at y0, so 
         every color missing at y0 is missing at x.  There is a color missing at y0 (K > Delta), 
         but if it were missing at x,  we would would not build the fan in the first place,
-        contradiction.  Since the fan is not reducible, M(y0) and M(y1) are disjoint, 
-        so y0 != y1 and e0 and e1 are not parallel.    
+        contradiction, and we can add an edge e1 to the fan.  The color of e1 is present at 
+        y1 and missing at y0, so y0 != y1 and e0 and e1 are not parallel.
         '''
         x = self.x
         for e in self.candidates:
