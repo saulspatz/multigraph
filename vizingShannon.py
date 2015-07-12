@@ -171,7 +171,7 @@ class Fan:
         present at x.  Then |M(x)| = K - p(x) and |M'(x)| = p(x) - (n-1), since the fan 
         has one uncolored edge.  Putting all this together,
         
-            K - deg(z0) + 1 + sum([K - deg(zj)], , 1 <= j <= m) + K - p(x) + p(x) -(n-1) <= K
+            K - deg(z0) + 1 + sum([K - deg(zj)], 1 <= j <= m) + K - p(x) + p(x) -(n-1) <= K
     
             (m+2)K - sum([deg(zj)], 0 <= j <= m) - n + 2 <= K
           
