@@ -489,6 +489,7 @@ class Multigraph:
 def main():
     if len(sys.argv) != 3:
         print('Usage: %s infile outfile' % os.path.basename(sys.argv[0]))
+        exit()
     from time import time
     start = time()
     G = Multigraph(sys.argv[1])
