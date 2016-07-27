@@ -7,7 +7,7 @@ We follow the outline at http://www.cse.ust.hk/~golin/COMP572/Notes/Matching.pdf
 but change the expanation in terms of "neighbor vertices" to a simpler one in
 terms of "candidate edges", and we minimize instead of maximizing.
 
-Call an assignment L of real numbers to the vertices an "labeling" if
+Call an assignment L of real numbers to the vertices a "labeling" if
 for every edge xy, we have L(x) + L(y) <= w(x,y) where w is the weight.
 Call an edge xy "tight" (w.r.t L) if L(x) + L(y) = w(x,y).
 It can be shown that a complete matching in which every edge is tight
